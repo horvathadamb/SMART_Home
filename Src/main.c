@@ -116,7 +116,6 @@ void vTaskWrite(void * pvParameters){
 	{
 		// Process raw data
 		bme280_measure_temperature_int32(sensor_raw_data,&temperature);
-//		bme280_measure_temperature_int32(sensor_raw_data, myptr);
 		bme280_measure_pressure_int32(sensor_raw_data,&pressure);
 		bme280_measure_humidity_int32(sensor_raw_data,&humidity);
 
