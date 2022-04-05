@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+Startup/
+stm*.c
+stm*.h
+main.h
+sys*.c
