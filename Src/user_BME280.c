@@ -279,7 +279,7 @@ int bme280_I2C_read(I2C_HandleTypeDef *hi2c,
 		uint16_t Size)
 {
 	HAL_StatusTypeDef I2C_Status;
-	I2C_Status = HAL_I2C_Mem_Read(&hi2c1, BME280_DEV_I2C_ADDR, (uint8_t*)MemAddress, 1, pData, Size, HAL_MAX_DELAY);
+	I2C_Status = HAL_I2C_Mem_Read(&hi2c1, BME280_DEV_I2C_ADDR, (uint8_t*)MemAddress, 1, pData, Size, 100);
 	// Check if I2C communication was successful
 	if(I2C_Status != HAL_OK)
 	{
@@ -301,7 +301,7 @@ int bme280_I2C_write(I2C_HandleTypeDef *hi2c,
 		uint8_t *pData)
 {
 	HAL_StatusTypeDef I2C_Status;
-	I2C_Status = HAL_I2C_Mem_Write(hi2c, BME280_DEV_I2C_ADDR, MemAddress, 1, &pData, 1, HAL_MAX_DELAY);
+	I2C_Status = HAL_I2C_Mem_Write(hi2c, BME280_DEV_I2C_ADDR, MemAddress, 1, &pData, 1, 100);
 	// Check if I2C communication was successful
 	if(I2C_Status != HAL_OK)
 		{

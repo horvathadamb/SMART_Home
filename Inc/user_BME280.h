@@ -16,6 +16,8 @@
 typedef enum
 {
 	No_Error = 				0x00,
+	Task_Error = 			0x02,
+	Semaphore_Error=		0x03,
 	Device_ID_Error = 		0x04,
 	NullPointer_Error = 	0x08,
 	Config_Error = 			0x16,
