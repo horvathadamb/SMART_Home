@@ -19,5 +19,8 @@ protocol.
 Main components:
 
 • ARM Cortex-M4 microprocessor on the STM32f411 Nucleo board.
+
 • Bosch BME280 Environmental sensor
+
 • FreeRTOS for real-time operation software
+
