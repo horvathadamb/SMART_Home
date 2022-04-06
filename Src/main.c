@@ -106,8 +106,8 @@ return len;
 
 /*-------------------------------------Task functions*------------------------------------*/
 
-// Process raw sensor data, then send to console
-void vTaskWrite(void * pvParameters){
+// Process raw sensor data to SI value
+void ProcessData(void * pvParameters){
 
 	TickType_t ALastWakeTime; // create tick value for wakeup
 	ALastWakeTime = xTaskGetTickCount(); // store when was the wakeup
@@ -116,39 +116,26 @@ void vTaskWrite(void * pvParameters){
 	{
 		// Process raw data
 		bme280_measure_temperature_int32(sensor_raw_data,&temperature);
-//		bme280_measure_temperature_int32(sensor_raw_data, myptr);
 		bme280_measure_pressure_int32(sensor_raw_data,&pressure);
 		bme280_measure_humidity_int32(sensor_raw_data,&humidity);
 
-		// Convert to printf %d
+		// Format temperature
 		temperature_low = temperature % 100;
 		temperature_high = temperature / 100;
 
 		// Convert to hPA
 		pressure_hPa = pressure / 100;
 
-		// Humidity to printf %d
+		// Format humidity
 		humidity_low = humidity % 100;
 		humidity_high = humidity / 1000;
 
-		// Error checking
-		if(BME280_ErrorStatus != No_Error)
-		{
-			printf("Error: 0x%x \r\n", BME280_ErrorStatus);
-		}
-
-		// Send data to console
-		printf("Temperature:  %ld,%ld °C \r\nPressure: %ld hPa\r\nHumidity: %ld,%ld" "%%" "\r\n",temperature_high,temperature_low,pressure_hPa,humidity_high,humidity_low);
-
-
-
-
-		xTaskDelayUntil(&ALastWakeTime, 1000);
+		xTaskDelayUntil(&ALastWakeTime, 100);
 	}
 }
 
 // Read raw sensor values
-void vTaskRead(void * pvParameters){
+void ReadSensor(void * pvParameters){
 
 	TickType_t BLastWakeTime;
 	BLastWakeTime = xTaskGetTickCount();
@@ -165,8 +152,29 @@ void vTaskRead(void * pvParameters){
 	}
 }
 
-void vTaskConfig(void * pvParameters){
-	// Write status data
+// Print Temperature, Pressure, Humidity to console
+void Print(void * pvParameters){
+	TickType_t BLastWakeTime;
+	BLastWakeTime = xTaskGetTickCount();
+
+	for( ;; )
+	{
+		// Error checking
+		if(BME280_ErrorStatus != No_Error)
+		{
+			printf("Error: 0x%x \r\n", BME280_ErrorStatus);
+		}
+		else
+		{
+			// Send data to console
+			printf("Temperature:  %ld,%ld °C \r\nPressure: %ld hPa\r\nHumidity: %ld,%ld" "%%" "\r\n",temperature_high,temperature_low,pressure_hPa,humidity_high,humidity_low);
+		}
+		xTaskDelayUntil(&BLastWakeTime, 100);
+	}
+}
+
+void Config(void * pvParameters){
+	 // Write status data
 	printf(__DATE__" "__TIME__"\r\n");
 	printf("Configuring sensor....\r\n");
 
@@ -189,9 +197,20 @@ void vTaskConfig(void * pvParameters){
 	// Parse calib data
 	parse_compensate(calib_data);
 
+	// Error checking
+	if(BME280_ErrorStatus != No_Error)
+	{
+		printf("Sensor config was unsuccessful! \r\n");
+	}
+	else
+	{
+		printf("Sensor configuratin was successful! \r\n");
+	}
+
 	// Delete task
 	vTaskDelete( NULL );
 }
+
 
 
 /* USER CODE END PFP */
@@ -236,53 +255,66 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
 
+
   // Create tasks
   TaskHandle_t xHandleA = NULL; // Handler to store task data
   TaskHandle_t xHandleB = NULL;
   TaskHandle_t xHandleC = NULL;
-  BaseType_t xRetruned; // to check create return value
+  BaseType_t xRetruned[4]; // to check create return value
   
 
-  xRetruned = xTaskCreate(vTaskWrite,
-		  "Task Write",
+  xRetruned[0] = xTaskCreate(ProcessData,
+		  "ProcessData",
 		  1024,
 		  NULL,
-		  tskIDLE_PRIORITY+1,  // lowest+1 prio
+		  tskIDLE_PRIORITY+2,
 		  &xHandleA);
 
-  xRetruned = xTaskCreate(vTaskRead,
-  		  "Task Read",
+  xRetruned[1] = xTaskCreate(ReadSensor,
+  		  "ReadSensor",
 		  1024,
 		  NULL,
-  		  tskIDLE_PRIORITY+2,  // lowest+2 prio
+  		  tskIDLE_PRIORITY+3,
   		  &xHandleB);
 
-  xRetruned = xTaskCreate(vTaskConfig,
-  		  "Task C",
+  xRetruned[2] = xTaskCreate(Print,
+  		  "Print",
   		  1024,
   		  NULL,
-  		  tskIDLE_PRIORITY+3,  // lowest+3 prio
+  		  tskIDLE_PRIORITY+1,
   		  &xHandleC);
 
+  xRetruned[3] = xTaskCreate(Config,
+		  "Config",
+		  1024,
+		  NULL,
+		  tskIDLE_PRIORITY + 4,
+		  &xHandleC);
+
   // Check if task creation was successful
-  if(xRetruned != pdPASS)
-    {
-  	 return -1;
-    }
+  for(int i=0;i<4;i++)
+  {
+	  if(xRetruned[i] != pdPASS)
+	    {
+		  return -1;
+	    }
+  }
 
   // Create Mutex for protecting shared resource
   xSemaphore = xSemaphoreCreateMutex();
-  //Check if semaphore creation was successful
-  if( xSemaphore == NULL )
-	  {
-	 return -2;
-	  }
+   if( xSemaphore == NULL )	 //Check if semaphore creation was successful
+  {
+	   BME280_ErrorStatus = Semaphore_Error;
+	   return BME280_ErrorStatus; // If not return error
+  }
 
 
-
-  // -------------Start OS--------------------------
+  /*-------------Start OS--------------------------*/
 
   vTaskStartScheduler();
+
+
+
 
 
   /* USER CODE END 2 */
