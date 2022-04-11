@@ -25,7 +25,7 @@ typedef enum
 	CTRL_Meas_Error = 		0x22,
 	I2C_Error = 			0x32
 
-} Error_StatusTypeDef;
+} BME280_Error_StatusTypeDef;
 
 /*---------------Register Address---------------------*/
 // Device

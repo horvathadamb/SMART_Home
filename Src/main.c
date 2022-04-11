@@ -27,6 +27,7 @@
 
 // User driver
 #include "user_BME280.h"
+#include "user_LCD_1602A.h"
 
 /* USER CODE END Includes */
 
@@ -79,7 +80,7 @@ uint8_t humidity_raw_data[2];
 uint8_t calib_data[32];
 
 // Error status
-Error_StatusTypeDef BME280_ErrorStatus;
+BME280_Error_StatusTypeDef BME280_ErrorStatus;
 int *myptr = NULL;
 
 
@@ -307,6 +308,12 @@ int main(void)
 	   BME280_ErrorStatus = Semaphore_Error;
 	   return BME280_ErrorStatus; // If not return error
   }
+
+  /*------------------LCD-------------------------*/
+
+   lcd_init();
+   lcd_send_string("HELLO WORLD");
+
 
 
   /*-------------Start OS--------------------------*/

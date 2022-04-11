@@ -9,7 +9,7 @@
 #include "stdlib.h"
 
 extern I2C_HandleTypeDef hi2c1;
-extern Error_StatusTypeDef BME280_ErrorStatus;
+extern BME280_Error_StatusTypeDef BME280_ErrorStatus;
 extern uint8_t device_id_data;
 int32_t temperature_fine;
 
